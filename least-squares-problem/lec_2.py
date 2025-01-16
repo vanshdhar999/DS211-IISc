@@ -5,102 +5,102 @@ import pandas as pd
 # Read the file
 df = pd.read_csv("real_estate_dataset.csv")
 
-# # get the number of samples
-# n_samples, n_features = df.shape
+# get the number of samples
+n_samples, n_features = df.shape
 
-# # Get the coulmns
-# columns = df.columns
+# Get the coulmns
+columns = df.columns
 
-# #Save the features in a text file
-# np.savetxt("coulmn_names.txt", columns, fmt="%s")
-
-
-# # features used => ["square feet", "garage", "location_score", "distance_to_center"]
+#Save the features in a text file
+np.savetxt("coulmn_names.txt", columns, fmt="%s")
 
 
-# X = df[["Square_Feet", "Garage_Size", "Location_Score", "Distance_to_Center"]]
+# features used => ["square feet", "garage", "location_score", "distance_to_center"]
 
 
-# y = df["Price"].values
+X = df[["Square_Feet", "Garage_Size", "Location_Score", "Distance_to_Center"]]
 
 
-# print(f"Shape of x is: {X.shape}\n")
-# print(f"Data type of x is: {X.dtypes}\n")
-
-# n_samples , n_features = X.shape
+y = df["Price"].values
 
 
-# coefs = np.ones(n_features + 1)
+print(f"Shape of x is: {X.shape}\n")
+print(f"Data type of x is: {X.dtypes}\n")
 
-# prediction_bydef = X @ coefs[1:] + coefs[0]
-
-
-# #Appending a column of ones in the X
-# X = np.hstack((np.ones((n_samples, 1)), X))
-
-# predictions = X @ coefs
+n_samples , n_features = X.shape
 
 
-# is_same = np.allclose(prediction_bydef, predictions)
+coefs = np.ones(n_features + 1)
+
+prediction_bydef = X @ coefs[1:] + coefs[0]
 
 
-# errors = y - predictions
+#Appending a column of ones in the X
+X = np.hstack((np.ones((n_samples, 1)), X))
 
-# # relative error
-# rel_err = errors  / y
-
-# # Brute force loss calculation
-# loss_loop = 0
-# for i in range(n_samples):
-#     loss_loop = loss_loop + errors[i] ** 2
-# loss_loop = loss_loop / n_samples
-
-# loss_matrix = np.transpose(errors) @ errors / n_samples
-
-# is_diff = np.allclose(loss_loop, loss_matrix)
-# print(f"Are the loss by direct method and matrix calculation: {is_diff}")
-
-# print(f"Size of errors: {errors.shape}")
-# print(f"L2 Norm of errors: {np.linalg.norm(errors)}")
-# print(f"L2 norm of rel_error: {np.linalg.norm(rel_err)}")
+predictions = X @ coefs
 
 
-# # What is my optimization problem?
-# # I want to find the coeffs that minimize the mean sqaured error this problem 
-# # is called as least squares problem
+is_same = np.allclose(prediction_bydef, predictions)
 
 
-# # Objective function: f(coefs) = 1/n_samples * ||y - X @ coefs||^2
+errors = y - predictions
 
-# # What is the solution?
-# # A solution is a set of coefficients that minimize the objective function
+# relative error
+rel_err = errors  / y
+
+# Brute force loss calculation
+loss_loop = 0
+for i in range(n_samples):
+    loss_loop = loss_loop + errors[i] ** 2
+loss_loop = loss_loop / n_samples
+
+loss_matrix = np.transpose(errors) @ errors / n_samples
+
+is_diff = np.allclose(loss_loop, loss_matrix)
+print(f"Are the loss by direct method and matrix calculation: {is_diff}")
+
+print(f"Size of errors: {errors.shape}")
+print(f"L2 Norm of errors: {np.linalg.norm(errors)}")
+print(f"L2 norm of rel_error: {np.linalg.norm(rel_err)}")
 
 
-# # Write the loss matrix in terms of the data and the coeffs 
+# What is my optimization problem?
+# I want to find the coeffs that minimize the mean sqaured error this problem 
+# is called as least squares problem
 
-# loss_matrix = (y - X @ coefs).T @ (y - X @ coefs) / n_samples
 
-# # scalar / vector derivative
-# grad_matrix = -2/n_samples * X.T @ (X @ coefs - y) / n_samples
+# Objective function: f(coefs) = 1/n_samples * ||y - X @ coefs||^2
 
-# # we set the gradient to zero to find the minimum
-# # -2/n_samples * X.T @ (X @ coefs - y) = 0
-# # X.T @ X @ coefs = X.T @ y
-# # coefs = (X.T @ X)^-1 @ X.T @ y
+# What is the solution?
+# A solution is a set of coefficients that minimize the objective function
 
-# coefs = np.linalg.inv(X.T @ X) @ X.T @ y
 
-# # save the coefs in a file
-# np.savetxt("coeffs.csv", coefs, delimiter=",")
+# Write the loss matrix in terms of the data and the coeffs 
 
-# predictions_model = X @ coefs
-# errors_model = y - predictions_model
+loss_matrix = (y - X @ coefs).T @ (y - X @ coefs) / n_samples
 
-# print(f"Norm of errors: {np.linalg.norm(errors_model)}")
-# #Print the L2 norm of the errors
-# print(f"L2 norm of rel_error: {np.linalg.norm(errors_model / y)}")
+# scalar / vector derivative
+grad_matrix = -2/n_samples * X.T @ (X @ coefs - y) / n_samples
 
-# Use all the features in the dataset to build the linear model
+# we set the gradient to zero to find the minimum
+# -2/n_samples * X.T @ (X @ coefs - y) = 0
+# X.T @ X @ coefs = X.T @ y
+# coefs = (X.T @ X)^-1 @ X.T @ y
+
+coefs = np.linalg.inv(X.T @ X) @ X.T @ y
+
+# save the coefs in a file
+np.savetxt("coeffs.csv", coefs, delimiter=",")
+
+predictions_model = X @ coefs
+errors_model = y - predictions_model
+
+print(f"Norm of errors: {np.linalg.norm(errors_model)}")
+#Print the L2 norm of the errors
+print(f"L2 norm of rel_error: {np.linalg.norm(errors_model / y)}")
+
+#Use all the features in the dataset to build the linear model
 
 X = df.drop("Price", axis=1)
 y = df["Price"].values
@@ -143,6 +143,7 @@ np.savetxt("R.csv", R, delimiter=",")
 # R*coeffs = Q.T @ y
 
 b = Q.T @ y
+
 #coeffs_qr = np.linalg.inv(R) @ b
 
 # Loop to solve R * coeffs = b using back substitution
@@ -171,10 +172,27 @@ np.savetxt("sol.csv", sol, delimiter=",")
 
 U, S, Vt = np.linalg.svd(X, full_matrices=False)
 
+# Using U, S, Vt find the coeffs
+# A = V @ D @ V.T
+# A^-1 = V @ D^-1 @ V.T
+# V @ D^-1 @ V.T @ X.T @ y = coeffs
+
+# calculate the coeffs using the eigen decomposition
+coeffs_svd = Vt.T @ np.linalg.inv(np.diag(S)) @ U.T @ y
+
+# Save the the coeffs in a file
+
+np.savetxt("coeffs_svd.csv", coeffs_svd, delimiter=",")
+
+# find the predictions using the svd_coeffs and find the error
+predictions_svd = X @ coeffs_svd
+
+errors_svd = y - predictions_svd
+print(f"Norm of errors using the SVD decomposition: {np.linalg.norm(errors_svd)}")
+print(f"Relative error using the SVD decomposition: {np.linalg.norm(errors_svd / y)}")
 
 # Find the inverse of X in the least squares sense
 # Pseudo inverse of X
-
 
 # To complete the pseudo inverse we need to find the inverse of S
 
