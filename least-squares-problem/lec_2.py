@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+import matplotlib.pyplot as plt
 
 # Read the file
 df = pd.read_csv("real_estate_dataset.csv")
@@ -196,5 +196,62 @@ print(f"Relative error using the SVD decomposition: {np.linalg.norm(errors_svd /
 
 # To complete the pseudo inverse we need to find the inverse of S
 
+### In class code
+
+# write X as a product of U, S, Vt
+X_svd = U @ np.diag(S) @ Vt
+
+# Solve for X_svd @ coeffs_svd = y
+# Normal Equation: X_svd^T @ X_svd @ coeffs = X_svd^T @ y
+
+# replace X_svd with U @ np.diag(S) @ Vt
+#Vt ^T @ np.diag(S)^2 @ Vt @ coeffs = Vt ^ T @ np.diag(S) @ U^T @ y
+# np.diag(S)^2 @ Vt @ coeffs = np.diag(S) @ U^T @ y
+#coeffs = Vt.T @ np.diag(S)^-1 @ U.T @ y
 
 
+coeffs_svd = Vt.T @ np.linalg.inv(np.diag(S)) @ U.T @ y # fail if system if rank deficient
+coeffs_svd_pinv = np.linalg.pinv(X) @ y #Keeps the threshold to find the inverse
+
+
+# Save the coeffs in a file
+np.savetxt("coeffs_svd_pinv.csv", coeffs_svd_pinv, delimiter=",")
+np.savetxt("coeffs_svd.csv", coeffs_svd, delimiter=",")
+
+# Rank deficiency: - Pseudo Inverse, SVD -> Inverse cant be found, so we use the other methods
+
+# X_1 = X[:, 0:1]
+# coeffs_1 = np.linalg.inv(X_1.T @ X_1) @ X_1.T @ y
+# Plot the data on X[:,1] vs y axis
+# Also plot the regression line with only X[:, 0] and X[:, 1] as features
+
+# first make X[:,1] as np.arange between min and max of X[:,1]
+# then calculate the predictions using the coefficients
+# X_feature = np.arange(np.min(X[:, 0]), np.max(X[:, 0]), 0.01)
+# plt.scatter(X[:, 1], y)
+# plt.plot(X_feature, X_feature * coeffs_svd[1], color="red")
+# plt.xlabel("Square Feet")
+# plt.ylabel("Price")
+# plt.title("Square Feet vs Price")
+# plt.show()
+# plt.savefig("Square_Feet_vs_Price.png")
+
+# Use X as only square feet  to build a linear model to predict price
+X = df[["Square_Feet"]].values
+y = df["Price"].values
+# add a column of ones to X
+X = np.hstack((np.ones((n_samples, 1)), X))
+coeffs_1 = np.linalg.inv(X.T @ X) @ X.T @ y
+
+predictions_1 = X @ coeffs_1
+X_feature = np.arange(np.min(X), np.max(X), 0.01)
+np.savetxt("coeffs_1.csv", X_feature, delimiter=",")
+# add a column of ones to X_feature
+X_feature = np.hstack((np.ones((X_feature.shape[0], 1)), X_feature.reshape(-1, 1)))
+
+plt.scatter(X[:, 1], y)
+plt.plot(X_feature[:, 1],X_feature @ coeffs_1, color="red")
+plt.xlabel("Square Feet")
+plt.ylabel("Price")
+plt.title("Square Feet vs Price")
+plt.show()
